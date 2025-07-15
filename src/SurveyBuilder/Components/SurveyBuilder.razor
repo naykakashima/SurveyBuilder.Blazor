@@ -9,23 +9,18 @@
   <MudSelect T="QuestionType" Label="Add Question Type" @bind-Value="newQuestionType">
       @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>())
       {
-          <MudSelectItem Value="type">@type</MudSelectItem>
+          <MudSelectItem Value="@type">@type</MudSelectItem>
       }
   </MudSelect>
   <MudButton OnClick="AddQuestion" Disabled="Survey.Questions.Count >= 10">Add Question</MudButton>
 
   <!-- Questions List -->
-  @* @foreach (var question in Survey.Questions)
+  @foreach (var question in Survey.Questions)
   {
-      <QuestionEditor Question="question" />
-  } *@
+        <QuestionEditor Question="question" OnDelete="RemoveQuestion" />
+  }
 
-  @foreach (var q in Survey.Questions)
-    {
-        <MudPaper Class="ma-2 pa-2">
-            <div>@q.Type.ToString()</div>
-        </MudPaper>
-    }
+  
 
   <!-- Export JSON (Later) -->
 </MudPaper>
@@ -45,5 +40,10 @@
             Required = false,
             Options = new List<string>() // default if needed
         });
+    }
+
+    private void RemoveQuestion(SurveyQuestionModel q)
+    {
+        Survey.Questions.Remove(q);
     }
 }

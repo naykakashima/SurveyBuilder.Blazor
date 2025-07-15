@@ -1,0 +1,130 @@
+﻿@using global::SurveyBuilder.Blazor.Models
+
+@inherits OwningComponentBase
+
+<MudPaper Class="p-3 mb-2">
+
+    <MudTextField Label="Question Text"
+                  @bind-Value="Question.Text"
+                  Immediate="true"
+                  Variant="Variant.Outlined"
+                  Class="mb-2" />
+
+    <!-- Type-Specific Editor -->
+    @switch (Question.Type)
+    {
+        case QuestionType.SingleChoice:
+        case QuestionType.Dropdown:
+            <MudText Typo="Typo.caption">Options (1–8)</MudText>
+            @for (int i = 0; i < Question.Options.Count; i++)
+            {
+                int index = i; // Local copy for closure
+                <MudTextField T="string"
+                              Immediate="true"
+                              Class="mb-1"
+                              Placeholder="Option text"
+                              Value="@Question.Options[index]"
+                              ValueChanged="async newValue => await HandleOptionChangedAsync(index, newValue)" />
+            }
+            <MudButton OnClick="AddOption" Disabled="Question.Options.Count >= 8" Size="Size.Small">
+                Add Option
+            </MudButton>
+            break;
+
+        case QuestionType.OpinionScale:
+            <MudSlider Min="1" Max="5" Disabled="true" Value="3" />
+            <MudText Typo="Typo.caption">1–5 scale (users will select)</MudText>
+            break;
+
+        case QuestionType.LikertScale:
+            <MudSelect Label="Likert Style"
+                   @bind-Value="LikertPreset">
+            @foreach (var preset in LikertPresets.Keys)
+            {
+                <MudSelectItem Value="preset">@preset</MudSelectItem>
+            }
+            </MudSelect>
+
+            <MudList 
+                T="string">
+                @foreach (var label in LikertPresets[LikertPreset])
+                {
+                    <MudListItem>@label</MudListItem>
+                }
+            </MudList>
+            break;
+
+        case QuestionType.OpenEnded:
+            <MudTextField T="string"
+                          Placeholder="Answer (user sees this)"
+                          Disabled="true"
+                          Lines="3"
+                          MaxLength="200" />
+            <MudText Typo="Typo.caption">200 char limit</MudText>
+            break;
+    }
+
+    <MudCheckBox T="bool" @bind-Checked="Question.Required" Label="Required" Class="mt-2" />
+
+    <MudButton OnClick="() => OnDelete.InvokeAsync(Question)" Color="Color.Error" Size="Size.Small" Variant="Variant.Text" Class="mt-2">
+        Delete
+    </MudButton>
+</MudPaper>
+
+@code {
+    [Parameter] public SurveyQuestionModel Question { get; set; } = default!;
+    [Parameter] public EventCallback<SurveyQuestionModel> OnDelete { get; set; }
+
+    private Dictionary<string, List<string>> LikertPresets = new()
+    {
+        ["Agree/Disagree"] = new() { "Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree" },
+        ["Frequency"] = new() { "Never", "Rarely", "Sometimes", "Often", "Always" },
+        ["Likelihood"] = new() { "Very Unlikely", "Unlikely", "Neutral", "Likely", "Very Likely" },
+    };
+
+    private string _likertPreset = "Agree/Disagree";
+    private string LikertPreset
+    {
+        get => _likertPreset;
+        set
+        {
+            if (_likertPreset != value)
+            {
+                _likertPreset = value;
+                if (LikertPresets.TryGetValue(value, out var labels))
+                {
+                    Question.Options = new List<string>(labels);
+                }
+            }
+        }
+    }
+
+    private Task HandleOptionChangedAsync(int index, string newValue)
+    {
+        if (index >= 0 && index < Question.Options.Count)
+            Question.Options[index] = newValue;
+
+        StateHasChanged(); // <-- Force re-render
+        return Task.CompletedTask;
+    }
+
+    private Task OnLikertChanged(string preset)
+    {
+        LikertPreset = preset;
+        if (LikertPresets.TryGetValue(preset, out var labels))
+        {
+            Question.Options = new List<string>(labels);
+        }
+        return Task.CompletedTask;
+    }
+
+
+    private void AddOption()
+    {
+        if (Question.Options.Count < 8)
+        {
+            Question.Options.Add("");
+        }
+    }
+}
+
