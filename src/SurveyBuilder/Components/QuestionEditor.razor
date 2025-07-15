@@ -20,25 +20,35 @@
             {
                 int index = i; // Local copy for closure
                 <MudTextField T="string"
+                              FullWidth="true"
                               Immediate="true"
                               Class="mb-1"
                               Placeholder="Option text"
                               Value="@Question.Options[index]"
                               ValueChanged="async newValue => await HandleOptionChangedAsync(index, newValue)" />
             }
-            <MudButton OnClick="AddOption" Disabled="Question.Options.Count >= 8" Size="Size.Small">
+            <MudButton Class="mt-2"
+                       Disabled="Question.Options.Count >= 8 || Question.Options.Any(string.IsNullOrWhiteSpace)"
+                       OnClick="AddOption"
+                       Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Add">
                 Add Option
             </MudButton>
             break;
 
         case QuestionType.OpinionScale:
-            <MudSlider Min="1" Max="5" Disabled="true" Value="3" />
+            <MudStack Row="true" AlignItems="_align" Spacing="2">
+                <MudText Typo="Typo.caption">1</MudText>
+                <MudSlider Min="1" Max="5" Disabled="true" Value="3" Style="flex: 1;" />
+                <MudText Typo="Typo.caption">5</MudText>
+            </MudStack>
             <MudText Typo="Typo.caption">1–5 scale (users will select)</MudText>
             break;
 
         case QuestionType.LikertScale:
             <MudSelect Label="Likert Style"
-                   @bind-Value="LikertPreset">
+                   @bind-Value="LikertPreset"
+                   FullWidth="true">
             @foreach (var preset in LikertPresets.Keys)
             {
                 <MudSelectItem Value="preset">@preset</MudSelectItem>
@@ -59,16 +69,14 @@
                           Placeholder="Answer (user sees this)"
                           Disabled="true"
                           Lines="3"
-                          MaxLength="200" />
+                          MaxLength="200"
+                          FullWidth="true"
+                          />
             <MudText Typo="Typo.caption">200 char limit</MudText>
             break;
     }
 
     <MudCheckBox T="bool" @bind-Checked="Question.Required" Label="Required" Class="mt-2" />
-
-    <MudButton OnClick="() => OnDelete.InvokeAsync(Question)" Color="Color.Error" Size="Size.Small" Variant="Variant.Text" Class="mt-2">
-        Delete
-    </MudButton>
 </MudPaper>
 
 @code {
@@ -99,6 +107,8 @@
         }
     }
 
+    AlignItems _align = AlignItems.Start;
+
     private Task HandleOptionChangedAsync(int index, string newValue)
     {
         if (index >= 0 && index < Question.Options.Count)
@@ -107,17 +117,6 @@
         StateHasChanged(); // <-- Force re-render
         return Task.CompletedTask;
     }
-
-    private Task OnLikertChanged(string preset)
-    {
-        LikertPreset = preset;
-        if (LikertPresets.TryGetValue(preset, out var labels))
-        {
-            Question.Options = new List<string>(labels);
-        }
-        return Task.CompletedTask;
-    }
-
 
     private void AddOption()
     {

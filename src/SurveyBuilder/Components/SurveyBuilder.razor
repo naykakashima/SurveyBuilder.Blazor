@@ -1,33 +1,74 @@
 ﻿@using global::SurveyBuilder.Blazor.Models
 
+@inject IDialogService DialogService
+
 <MudPaper Class="pa-4">
-  <!-- Title & Description -->
-  <MudTextField Label="Survey Title" @bind-Value="Survey.Title" />
-  <MudTextField Label="Description" @bind-Value="Survey.Description" Lines="3" />
+    <!-- Title & Description -->
+    <MudCard Outlined="true" Class="mb-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">
+                    Create your survey title and description here
+                </MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField Label="Survey Title" @bind-Value="Survey.Title" FullWidth="true" Class="mb-2" />
+            <MudTextField Label="Description" @bind-Value="Survey.Description" Lines="3" FullWidth="true" />
+        </MudCardContent>
+    </MudCard>
 
-  <!-- Add Question -->
-  <MudSelect T="QuestionType" Label="Add Question Type" @bind-Value="newQuestionType">
-      @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>())
-      {
-          <MudSelectItem Value="@type">@type</MudSelectItem>
-      }
-  </MudSelect>
-  <MudButton OnClick="AddQuestion" Disabled="Survey.Questions.Count >= 10">Add Question</MudButton>
+    <!-- Add Question Button -->
+    <MudStack Row="false" Spacing="1" AlignItems="_align" Class="mb-4">
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="AddQuestion"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Disabled="Survey.Questions.Count >= 10">
+            Add Question
+        </MudButton>
 
-  <!-- Questions List -->
-  @foreach (var question in Survey.Questions)
-  {
-        <QuestionEditor Question="question" OnDelete="RemoveQuestion" />
-  }
+        @if (Survey.Questions.Count == 0)
+        {
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+                No questions yet. Add one to get started.
+            </MudText>
+        }
+    </MudStack>
 
-  
+    <!-- Survey Questions -->
+    @foreach (var question in Survey.Questions)
+    {
+        <MudPaper Elevation="1" Class="p-3 d-flex justify-between align-center mb-2">
+            <!-- Question Text -->
+            <MudText Typo="Typo.subtitle2" Class="pa-1 flex-grow-1">
+                @(!string.IsNullOrWhiteSpace(question.Text)
+                    ? question.Text
+                    : "Question hasn't been created yet")
+            </MudText>
 
-  <!-- Export JSON (Later) -->
+            <!-- Edit / Delete Buttons -->
+            <MudStack Row="true" Spacing="1">
+                <MudButton Size="Size.Small"
+                           Variant="Variant.Filled"
+                           OnClick="@(() => OpenEditorDialog(question))">
+                    Edit
+                </MudButton>
+                <MudButton Size="Size.Small"
+                           Color="Color.Error"
+                           Variant="Variant.Outlined"
+                           OnClick="@(() => RemoveQuestion(question))">
+                    Delete
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    }
 </MudPaper>
 
 @code {
     private SurveyModel Survey = new(); // main state
     private QuestionType newQuestionType = QuestionType.SingleChoice;
+    AlignItems _align = AlignItems.Start;
 
     private void AddQuestion()
     {
@@ -46,4 +87,26 @@
     {
         Survey.Questions.Remove(q);
     }
+
+    private async Task OpenEditorDialog(SurveyQuestionModel question)
+    {
+        var parameters = new DialogParameters
+        {
+            ["OriginalQuestion"] = question
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+        var dialog = await DialogService.ShowAsync<QuestionEditorDialog>("Edit Question", parameters, options);
+        var result = await dialog.Result;
+
+        if ( !result.Canceled && result.Data is SurveyQuestionModel updated)
+        {
+            // Update the original question
+            var index = Survey.Questions.IndexOf(question);
+            if (index != -1)
+                Survey.Questions[index] = updated;
+        }
+    }
+
 }

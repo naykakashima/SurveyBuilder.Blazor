@@ -1,0 +1,36 @@
+﻿@using global::SurveyBuilder.Blazor.Models
+@using MudBlazor
+@inject IDialogService DialogService
+
+<MudDialog>
+    <QuestionEditor Question="@editableQuestion" />
+    <MudButton OnClick="Save" Color="Color.Primary">Save</MudButton>
+    <MudButton OnClick="Cancel">Cancel</MudButton>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public SurveyQuestionModel OriginalQuestion { get; set; } = default!;
+
+    private SurveyQuestionModel editableQuestion = new();
+
+    protected override void OnInitialized()
+    {
+        // Clone the original to avoid modifying the real one before save
+        editableQuestion = new SurveyQuestionModel
+        {
+            Text = OriginalQuestion.Text,
+            Type = OriginalQuestion.Type,
+            Required = OriginalQuestion.Required,
+            Options = new List<string>(OriginalQuestion.Options)
+        };
+    }
+
+    private void Save()
+    {
+        MudDialog.Close(DialogResult.Ok(editableQuestion));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
