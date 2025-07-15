@@ -1,1 +1,49 @@
-﻿<h3>Survey Builder Initialized ✅</h3>
+﻿@using global::SurveyBuilder.Blazor.Models
+
+<MudPaper Class="pa-4">
+  <!-- Title & Description -->
+  <MudTextField Label="Survey Title" @bind-Value="Survey.Title" />
+  <MudTextField Label="Description" @bind-Value="Survey.Description" Lines="3" />
+
+  <!-- Add Question -->
+  <MudSelect T="QuestionType" Label="Add Question Type" @bind-Value="newQuestionType">
+      @foreach (var type in Enum.GetValues(typeof(QuestionType)).Cast<QuestionType>())
+      {
+          <MudSelectItem Value="type">@type</MudSelectItem>
+      }
+  </MudSelect>
+  <MudButton OnClick="AddQuestion" Disabled="Survey.Questions.Count >= 10">Add Question</MudButton>
+
+  <!-- Questions List -->
+  @* @foreach (var question in Survey.Questions)
+  {
+      <QuestionEditor Question="question" />
+  } *@
+
+  @foreach (var q in Survey.Questions)
+    {
+        <MudPaper Class="ma-2 pa-2">
+            <div>@q.Type.ToString()</div>
+        </MudPaper>
+    }
+
+  <!-- Export JSON (Later) -->
+</MudPaper>
+
+@code {
+    private SurveyModel Survey = new(); // main state
+    private QuestionType newQuestionType = QuestionType.SingleChoice;
+
+    private void AddQuestion()
+    {
+        if (Survey.Questions.Count >= 10) return;
+
+        Survey.Questions.Add(new SurveyQuestionModel
+        {
+            Text = "",
+            Type = newQuestionType,
+            Required = false,
+            Options = new List<string>() // default if needed
+        });
+    }
+}
