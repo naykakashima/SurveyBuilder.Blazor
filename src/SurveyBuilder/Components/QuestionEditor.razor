@@ -1,87 +1,185 @@
 ﻿@using global::SurveyBuilder.Blazor.Models
-
-@inherits OwningComponentBase
+@using MudBlazor
 
 <MudPaper Class="p-3 mb-2">
+    <!-- Question Type Selector -->
+    <MudSelect Label="Question Type"
+               @bind-Value="Question.Type"
+               FullWidth="true"
+               Class="mb-3">
+        @foreach (var type in Enum.GetValues<QuestionType>())
+        {
+            <MudSelectItem Value="type">@type.ToString()</MudSelectItem>
+        }
+    </MudSelect>
 
+    <!-- Question Text -->
     <MudTextField Label="Question Text"
                   @bind-Value="Question.Text"
                   Immediate="true"
                   Variant="Variant.Outlined"
-                  Class="mb-2" />
+                  Class="mb-4" />
 
     <!-- Type-Specific Editor -->
-    @switch (Question.Type)
+    @if (Question.Type == QuestionType.OpenEnded)
     {
-        case QuestionType.SingleChoice:
-        case QuestionType.Dropdown:
-            <MudText Typo="Typo.caption">Options (1–8)</MudText>
+        <MudTextField T="string"
+                      Placeholder="Answer (user sees this)"
+                      Disabled="true"
+                      Lines="3"
+                      MaxLength="200"
+                      FullWidth="true" />
+        <MudText Typo="Typo.caption">200 char limit</MudText>
+    }
+    else if (Question.Type == QuestionType.OpinionScale)
+    {
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+            <MudText Typo="Typo.caption">1</MudText>
+            <MudSlider Min="1" Max="5" Disabled="true" Value="3" Style="flex: 1;" />
+            <MudText Typo="Typo.caption">5</MudText>
+        </MudStack>
+        <MudText Typo="Typo.caption">1–5 scale (users will select)</MudText>
+    }
+    else if (Question.Type == QuestionType.LikertScale)
+    {
+        <div class="mb-3">
+            <MudSelect Label="Likert Style"
+                       @bind-Value="SelectedLikertPreset"
+                       FullWidth="true"
+                       Class="mb-3">
+                @foreach (var preset in LikertPresets.Keys)
+                {
+                    <MudSelectItem Value="preset">@preset</MudSelectItem>
+                }
+            </MudSelect>
+        
+            @if (!string.IsNullOrEmpty(SelectedLikertPreset))
+            {
+                <div>
+                    <!-- Preview Section -->
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Preview:</MudText>
+                    <div class="d-flex justify-space-between align-center mb-2">
+                        @foreach (var label in Question.Options)
+                        {
+                            <div class="text-center" style="flex: 1; min-width: 0; padding: 0 4px;">
+                                <MudText Typo="Typo.body2" Class="text-truncate">@label</MudText>
+                            </div>
+                        }
+                    </div>
+                
+                    <!-- Visual scale representation -->
+                    <div class="d-flex align-center mb-2">
+                        @for (int i = 0; i < Question.Options.Count; i++)
+                        {
+                            <div style="position: relative; flex: 1; text-align: center;">
+                                <MudIconButton Icon="@Icons.Material.Filled.RadioButtonUnchecked" 
+                                               Size="Size.Small" 
+                                               Disabled="true" 
+                                               Class="my-0" />
+                                @if (i < Question.Options.Count - 1)
+                                {
+                                    <div style="position: absolute; top: 50%; left: 50%; 
+                                                height: 1px; background: #ccc; width: 100%; 
+                                                transform: translateY(-50%); z-index: -1;"></div>
+                                }
+                            </div>
+                        }
+                    </div>
+                
+                    <MudText Typo="Typo.caption" Class="d-flex justify-space-between">
+                        <span>Leftmost: @Question.Options.FirstOrDefault()</span>
+                        <span>Rightmost: @Question.Options.LastOrDefault()</span>
+                    </MudText>
+                </div>
+            }
+            else
+            {
+                <MudText Typo="Typo.caption" Class="mt-2">
+                    Select a preset to see the preview
+                </MudText>
+            }
+        </div>
+        }
+        else if (Question.Type == QuestionType.SingleChoice || 
+             Question.Type == QuestionType.Dropdown ||
+             Question.Type == QuestionType.MultiChoice)
+        {
+                if (Question.Type == QuestionType.SingleChoice || 
+                 Question.Type == QuestionType.Dropdown ||
+                 Question.Type == QuestionType.MultiChoice)
+                 {
+                    // If the current options match one of the Likert presets, reset them
+                    bool isLikertPreset = LikertPresets.Values.Any(preset => preset.SequenceEqual(Question.Options));
+
+                    if (isLikertPreset || Question.Options.Count == 0)
+                    {
+                        // Initialize with blank options
+                        Question.Options = new List<string> { "" };
+                    }
+
+                    _selectedLikertPreset = ""; // Clear preset if coming from Likert
+                }
+                else
+                {
+                    // Other question types (OpenEnded, OpinionScale, etc.) should have no options
+                    Question.Options.Clear();
+                    SelectedLikertPreset = "";
+                }
+
+            <MudText Typo="Typo.caption" Class="mb-2">
+                Options (1–8) - @(Question.Type == QuestionType.MultiChoice ? "Select multiple" : "Select one")
+            </MudText>
+    
             @for (int i = 0; i < Question.Options.Count; i++)
             {
-                int index = i; // Local copy for closure
-                <MudTextField T="string"
-                              FullWidth="true"
-                              Immediate="true"
-                              Class="mb-1"
-                              Placeholder="Option text"
-                              Value="@Question.Options[index]"
-                              ValueChanged="async newValue => await HandleOptionChangedAsync(index, newValue)" />
+                int index = i;
+                <div class="d-flex align-center mb-2">
+                    <!-- Show different icons based on question type -->
+                    <MudIcon Icon="@GetOptionIcon(Question.Type)" 
+                             Class="mr-2" 
+                             Size="Size.Small" />
+            
+                    <MudTextField T="string"
+                                  FullWidth="true"
+                                  Immediate="true"
+                                  Placeholder="Option text"
+                                  Value="@Question.Options[index]"
+                                  ValueChanged="(newValue) => HandleOptionChanged(index, newValue)" />
+            
+                    @if (Question.Options.Count > 1)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                       OnClick="() => RemoveOption(index)"
+                                       Class="ml-2" />
+                    }
+                </div>
             }
-            <MudButton Class="mt-2"
+    
+            <MudButton Class="d-flex justify-end mt-2"
                        Disabled="Question.Options.Count >= 8 || Question.Options.Any(string.IsNullOrWhiteSpace)"
                        OnClick="AddOption"
                        Size="Size.Small"
-                       StartIcon="@Icons.Material.Filled.Add">
+                       StartIcon="@Icons.Material.Filled.Add"
+                       Variant="Variant.Outlined">
                 Add Option
             </MudButton>
-            break;
-
-        case QuestionType.OpinionScale:
-            <MudStack Row="true" AlignItems="_align" Spacing="2">
-                <MudText Typo="Typo.caption">1</MudText>
-                <MudSlider Min="1" Max="5" Disabled="true" Value="3" Style="flex: 1;" />
-                <MudText Typo="Typo.caption">5</MudText>
-            </MudStack>
-            <MudText Typo="Typo.caption">1–5 scale (users will select)</MudText>
-            break;
-
-        case QuestionType.LikertScale:
-            <MudSelect Label="Likert Style"
-                   @bind-Value="LikertPreset"
-                   FullWidth="true">
-            @foreach (var preset in LikertPresets.Keys)
+    
+            <!-- Show selection limits for multi-choice -->
+            @if (Question.Type == QuestionType.MultiChoice)
             {
-                <MudSelectItem Value="preset">@preset</MudSelectItem>
+                <MudText Typo="Typo.caption" Class="mt-1">
+                    Users will be able to select multiple options
+                </MudText>
             }
-            </MudSelect>
+        }
 
-            <MudList 
-                T="string">
-                @foreach (var label in LikertPresets[LikertPreset])
-                {
-                    <MudListItem>@label</MudListItem>
-                }
-            </MudList>
-            break;
-
-        case QuestionType.OpenEnded:
-            <MudTextField T="string"
-                          Placeholder="Answer (user sees this)"
-                          Disabled="true"
-                          Lines="3"
-                          MaxLength="200"
-                          FullWidth="true"
-                          />
-            <MudText Typo="Typo.caption">200 char limit</MudText>
-            break;
-    }
-
-    <MudCheckBox T="bool" @bind-Checked="Question.Required" Label="Required" Class="mt-2" />
-</MudPaper>
+        <!-- Required Toggle -->
+        <MudCheckBox T="bool" @bind-Checked="Question.Required" Label="Required" Class="mt-4" />
+    </MudPaper>
 
 @code {
-    [Parameter] public SurveyQuestionModel Question { get; set; } = default!;
-    [Parameter] public EventCallback<SurveyQuestionModel> OnDelete { get; set; }
+    [Parameter] 
+    public SurveyQuestionModel Question { get; set; } = null!;
 
     private Dictionary<string, List<string>> LikertPresets = new()
     {
@@ -90,32 +188,96 @@
         ["Likelihood"] = new() { "Very Unlikely", "Unlikely", "Neutral", "Likely", "Very Likely" },
     };
 
-    private string _likertPreset = "Agree/Disagree";
-    private string LikertPreset
+    private QuestionType _questionType;
+
+    private QuestionType QuestionType
     {
-        get => _likertPreset;
+        get => _questionType;
         set
         {
-            if (_likertPreset != value)
+            if (_questionType != value)
             {
-                _likertPreset = value;
-                if (LikertPresets.TryGetValue(value, out var labels))
+                _questionType = value;
+                OnQuestionTypeChanged(value);
+                Question.Type = value;
+            }
+        }
+    }
+
+    private string _selectedLikertPreset = ""; // Start with empty selection
+
+    private string SelectedLikertPreset
+    {
+        get => _selectedLikertPreset;
+        set
+        {
+            if (_selectedLikertPreset != value)
+            {
+                _selectedLikertPreset = value;
+
+                if (!string.IsNullOrEmpty(value) && 
+                    LikertPresets.TryGetValue(value, out var labels))
                 {
                     Question.Options = new List<string>(labels);
                 }
             }
         }
     }
+    protected override void OnParametersSet()
+    {
+        if (Question.Type == QuestionType.LikertScale)
+        {
+            var matched = LikertPresets.FirstOrDefault(p => p.Value.SequenceEqual(Question.Options));
+            if (!string.IsNullOrEmpty(matched.Key))
+            {
+                SelectedLikertPreset = matched.Key;
+            }
+            else
+            {
+                Question.Options = new List<string>(LikertPresets["Agree/Disagree"]);
+                SelectedLikertPreset = "Agree/Disagree";
+            }
+        }
+        else if (Question.Type == QuestionType.SingleChoice ||
+                 Question.Type == QuestionType.Dropdown ||
+                 Question.Type == QuestionType.MultiChoice)
+        {
+            // If the current options match one of the Likert presets, reset them
+            bool isLikertPreset = LikertPresets.Values.Any(preset => preset.SequenceEqual(Question.Options));
 
-    AlignItems _align = AlignItems.Start;
+            if (isLikertPreset || Question.Options.Count == 0)
+            {
+                // Initialize with blank options
+                Question.Options = new List<string> { "" };
+            }
 
-    private Task HandleOptionChangedAsync(int index, string newValue)
+            _selectedLikertPreset = ""; // Clear preset if coming from Likert
+        }
+        else
+        {
+            // Other question types (OpenEnded, OpinionScale, etc.) should have no options
+            Question.Options.Clear();
+            SelectedLikertPreset = "";
+        }
+    }
+
+    private void HandleOptionChanged(int index, string newValue)
     {
         if (index >= 0 && index < Question.Options.Count)
+        {
             Question.Options[index] = newValue;
+        }
+    }
 
-        StateHasChanged(); // <-- Force re-render
-        return Task.CompletedTask;
+    private string GetOptionIcon(QuestionType type)
+    {
+        return type switch
+        {
+            QuestionType.SingleChoice => Icons.Material.Filled.RadioButtonUnchecked,
+            QuestionType.Dropdown => Icons.Material.Filled.ArrowDropDown,
+            QuestionType.MultiChoice => Icons.Material.Filled.CheckBoxOutlineBlank,
+            _ => Icons.Material.Filled.Label
+        };
     }
 
     private void AddOption()
@@ -125,5 +287,42 @@
             Question.Options.Add("");
         }
     }
-}
 
+    private void RemoveOption(int index)
+    {
+        if (Question.Options.Count > 1)
+        {
+            Question.Options.RemoveAt(index);
+        }
+    }
+
+    private void OnQuestionTypeChanged(QuestionType newType)
+    {
+        if (newType == QuestionType.LikertScale)
+        {
+            // Use preset if not already set
+            if (!LikertPresets.Values.Any(p => p.SequenceEqual(Question.Options)))
+            {
+                Question.Options = new List<string>(LikertPresets["Agree/Disagree"]);
+                SelectedLikertPreset = "Agree/Disagree";
+            }
+        }
+        else if (newType == QuestionType.SingleChoice ||
+                 newType == QuestionType.MultiChoice ||
+                 newType == QuestionType.Dropdown)
+        {
+            // Reset to empty options if coming from Likert
+            if (Question.Type == QuestionType.LikertScale)
+            {
+                Question.Options = new List<string> { "", "" };
+                SelectedLikertPreset = "";
+            }
+        }
+        else
+        {
+            // For other types, clear options
+            Question.Options.Clear();
+            SelectedLikertPreset = "";
+        }
+    }
+}

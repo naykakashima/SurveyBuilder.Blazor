@@ -3,23 +3,29 @@
 @inject IDialogService DialogService
 
 <MudDialog>
-    <QuestionEditor Question="@editableQuestion" />
-    <MudButton OnClick="Save" Color="Color.Primary">Save</MudButton>
-    <MudButton OnClick="Cancel">Cancel</MudButton>
+    <DialogContent>
+        <QuestionEditor Question="@editableQuestion" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton OnClick="Save" Color="Color.Primary">Save</MudButton>
+    </DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Parameter] public SurveyQuestionModel OriginalQuestion { get; set; } = default!;
+    [Parameter] 
+    public SurveyQuestionModel OriginalQuestion { get; set; } = null!;
 
     private SurveyQuestionModel editableQuestion = new();
 
     protected override void OnInitialized()
     {
-        // Clone the original to avoid modifying the real one before save
+        // Deep clone the original question
         editableQuestion = new SurveyQuestionModel
         {
+            Id = OriginalQuestion.Id,
             Text = OriginalQuestion.Text,
             Type = OriginalQuestion.Type,
             Required = OriginalQuestion.Required,
@@ -29,6 +35,7 @@
 
     private void Save()
     {
+        // Return the updated question
         MudDialog.Close(DialogResult.Ok(editableQuestion));
     }
 

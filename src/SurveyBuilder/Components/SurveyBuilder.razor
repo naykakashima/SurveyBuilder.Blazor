@@ -90,22 +90,29 @@
 
     private async Task OpenEditorDialog(SurveyQuestionModel question)
     {
-        var parameters = new DialogParameters
+        var parameters = new DialogParameters<QuestionEditorDialog>
         {
-            ["OriginalQuestion"] = question
+            { x => x.OriginalQuestion, question }
         };
 
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var options = new DialogOptions 
+        { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Medium, 
+            FullWidth = true,
+            CloseOnEscapeKey = true
+        };
 
         var dialog = await DialogService.ShowAsync<QuestionEditorDialog>("Edit Question", parameters, options);
         var result = await dialog.Result;
 
-        if ( !result.Canceled && result.Data is SurveyQuestionModel updated)
+        if (!result.Canceled && result.Data is SurveyQuestionModel updated)
         {
-            // Update the original question
             var index = Survey.Questions.IndexOf(question);
             if (index != -1)
+            {
                 Survey.Questions[index] = updated;
+            }
         }
     }
 

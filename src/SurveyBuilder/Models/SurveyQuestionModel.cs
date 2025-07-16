@@ -13,7 +13,6 @@ namespace SurveyBuilder.Blazor.Models
         public QuestionType Type { get; set; }
         public bool Required { get; set; } = false;
         public List<string>? Options { get; set; }
-        public List<string>? LikertStatements { get; set; }
     }
 
 }

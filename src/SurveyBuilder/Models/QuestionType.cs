@@ -11,6 +11,7 @@ namespace SurveyBuilder.Blazor.Models
         SingleChoice,
         OpinionScale,
         LikertScale,
+        MultiChoice,
         Dropdown,
         OpenEnded
     }
