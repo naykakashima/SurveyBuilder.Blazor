@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SurveyBuilder.Blazor.Models
+namespace SurveyBuilder.Models
 {
     public class SurveyModel
     {
