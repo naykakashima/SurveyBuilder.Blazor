@@ -4,7 +4,7 @@
 
 $projPath = "src/SurveyBuilder/SurveyBuilder.csproj"
 $nupkgOut = "nupkg"
-$hostAppPath = "samples/SurveyBuilderHost" # adjust this if your host app path changes
+$hostAppPath = "samples/SurveyBuilder.DemoApp" # adjust this if your host app path changes
 
 Write-Host "`n📦 Starting SurveyBuilder NuGet build process..." -ForegroundColor Cyan
 
@@ -68,7 +68,7 @@ Write-Host "`n🔁 Refreshing package in host app..." -ForegroundColor Cyan
 Push-Location $hostAppPath
 
 dotnet remove package SurveyBuilder
-dotnet add package SurveyBuilder --source ../../nupkg
+dotnet add package SurveyBuilder --source ../../nupkg --prerelease
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Package re-added in host app!" -ForegroundColor Green

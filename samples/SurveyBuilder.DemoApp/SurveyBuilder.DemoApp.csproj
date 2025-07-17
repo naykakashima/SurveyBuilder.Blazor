@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="MudBlazor" Version="8.*" />
-    <PackageReference Include="SurveyBuilder" Version="1.0.1-dev" />
+    <PackageReference Include="SurveyBuilder" Version="1.0.3-dev" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,36 @@
+﻿@page "/createsurvey"
+@using SurveyBuilder.Components
+@using SurveyBuilder.Models
+@using SurveyBuilder.Services
+@inject ISurveyJsonService JsonService
+
+<PageTitle>Create Survey</PageTitle>
+
+<h3>Create/Edit Survey</h3>
+
+<SurveyBuilder SurveyChanged="@OnSurveyChanged" />
+
+<MudText Typo="Typo.subtitle2" Class="mt-4">Serialized Output:</MudText>
+<MudTextField @bind-Value="Serialized" Lines="20" FullWidth="true" ReadOnly="true" />
+
+<MudButton OnClick="SaveToDb" Color="Color.Primary" Class="mt-2">Save to DB</MudButton>
+
+@code {
+    private SurveyModel? CurrentSurvey;
+    private string Serialized = "";
+
+    private Task OnSurveyChanged(SurveyModel survey)
+    {
+        CurrentSurvey = survey;
+        Serialized = JsonService.Serialize(survey);
+        return Task.CompletedTask;
+    }
+
+    private Task SaveToDb()
+    {
+        // TODO: Send `CurrentSurvey` to DB via API or EF
+        Console.WriteLine("Save triggered:");
+        Console.WriteLine(Serialized);
+        return Task.CompletedTask;
+    }
+}

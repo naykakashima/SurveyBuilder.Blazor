@@ -1,36 +1,28 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
-
+<Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
- <PropertyGroup>
+  <PropertyGroup>
     <RootNamespace>SurveyBuilder</RootNamespace>
-	<PackageId>SurveyBuilder</PackageId>
- </PropertyGroup>
-	
-	<PropertyGroup>
-		<Version>1.0.1-dev</Version>
-		<Authors>Kay</Authors>
-		<Company>KayLabs</Company>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Description>Reusable Blazor components to build and render surveys dynamically, inspired by SurveyJS.</Description>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-	</PropertyGroup>
-
-
+    <PackageId>SurveyBuilder</PackageId>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Version>1.0.3-dev</Version>
+    <Authors>Kay</Authors>
+    <Company>KayLabs</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Reusable Blazor components to build and render surveys dynamically, inspired by SurveyJS.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
   <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.7" />
     <PackageReference Include="MudBlazor" Version="8.9.0" />
   </ItemGroup>
-
-
 </Project>
