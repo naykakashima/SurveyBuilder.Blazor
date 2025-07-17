@@ -2,6 +2,16 @@
 
 @inject IDialogService DialogService
 
+<MudStack Row="true" Class="mb-2 justify-end pa-2">
+    <MudButton Variant="Variant.Filled" 
+               StartIcon="@Icons.Material.Filled.Visibility"
+               Color="Color.Primary"
+               OnClick="OpenPreviewDialog">
+
+                   Preview Survey
+    </MudButton>
+</MudStack>
+
 <MudPaper Class="pa-4">
     <!-- Title & Description -->
     <MudCard Outlined="true" Class="mb-4">
@@ -114,6 +124,23 @@
                 Survey.Questions[index] = updated;
             }
         }
+    }
+
+    private async Task OpenPreviewDialog()
+    {
+        var parameters = new DialogParameters<SurveyPreviewDialog>
+        {
+            { x => x.Survey, Survey }
+        };
+
+        var options = new DialogOptions
+        {
+            FullWidth = true,
+            MaxWidth = MaxWidth.Large,
+            CloseOnEscapeKey = true
+        };
+
+        await DialogService.ShowAsync<SurveyPreviewDialog>("Preview Survey", parameters, options);
     }
 
 }

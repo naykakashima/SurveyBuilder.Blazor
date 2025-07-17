@@ -1,0 +1,75 @@
+﻿@using MudBlazor
+@using global::SurveyBuilder.Models
+
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">@Survey.Title</MudText>
+        <MudText Typo="Typo.subtitle2" Class="mb-3">@Survey.Description</MudText>
+
+        @if (Survey.Questions.Count == 0)
+        {
+            <MudText Typo="Typo.body1"> No Questions Added Yet </MudText>
+        }
+
+        @foreach (var q in Survey.Questions)
+        {
+            <MudPaper Class="mb-2 p-3">
+                <MudText Typo="Typo.body1">@q.Text</MudText>
+
+                @switch (q.Type)
+                {
+                    case QuestionType.OpenEnded:
+                        <MudTextField T="string" Disabled="true" Placeholder="User answer here..." Lines="3" FullWidth="true" />
+                        break;
+
+                    case QuestionType.OpinionScale:
+                        <MudSlider Min="1" Max="5" Disabled="true" Value="3" />
+                        break;
+
+                    case QuestionType.LikertScale:
+                        <MudRadioGroup T="string"  Disabled="true">
+                            @foreach (var opt in q.Options)
+                            {
+                                <MudRadio T="string" Value="@opt">@opt</MudRadio>
+                            }
+                        </MudRadioGroup>
+                        break;
+
+                    case QuestionType.SingleChoice:
+                        <MudRadioGroup T="string" Disabled="true">
+                            @foreach (var opt in q.Options)
+                            {
+                                <MudRadio T="string" Value="@opt">@opt</MudRadio>
+                            }
+                        </MudRadioGroup>
+                        break;
+
+                    case QuestionType.MultiChoice:
+                        @foreach (var opt in q.Options)
+                        {
+                            <MudCheckBox T="bool" Label="@opt" Disabled="true" />
+                        }
+                        break;
+
+                    case QuestionType.Dropdown:
+                        <MudSelect  T="string" Disabled="true">
+                            @foreach (var opt in q.Options)
+                            {
+                                <MudSelectItem Value="@opt">@opt</MudSelectItem>
+                            }
+                        </MudSelect>
+                        break;
+                }
+            </MudPaper>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="() => MudDialog.Cancel()">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public SurveyModel Survey { get; set; } = null!;
+}
