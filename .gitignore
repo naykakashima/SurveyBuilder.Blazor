@@ -364,3 +364,8 @@ FodyWeavers.xsd
 
 #appsettings.json
 appsettings.json
+
+#nuget package files
+bin/
+obj/
+nupkg/

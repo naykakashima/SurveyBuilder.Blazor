@@ -10,6 +10,17 @@
     <RootNamespace>SurveyBuilder</RootNamespace>
 	<PackageId>SurveyBuilder</PackageId>
  </PropertyGroup>
+	
+	<PropertyGroup>
+		<Version>1.0.0-dev</Version>
+		<Authors>Kay</Authors>
+		<Company>KayLabs</Company>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Reusable Blazor components to build and render surveys dynamically, inspired by SurveyJS.</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
 
 
   <ItemGroup>

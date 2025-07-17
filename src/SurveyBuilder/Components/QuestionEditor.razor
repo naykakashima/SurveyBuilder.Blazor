@@ -101,11 +101,9 @@
         </div>
         }
         else if (Question.Type == QuestionType.SingleChoice || 
-             Question.Type == QuestionType.Dropdown ||
              Question.Type == QuestionType.MultiChoice)
         {
                 if (Question.Type == QuestionType.SingleChoice || 
-                 Question.Type == QuestionType.Dropdown ||
                  Question.Type == QuestionType.MultiChoice)
                  {
                     // If the current options match one of the Likert presets, reset them
@@ -174,7 +172,7 @@
         }
 
         <!-- Required Toggle -->
-        <MudCheckBox T="bool" @bind-Checked="Question.Required" Label="Required" Class="mt-4" />
+        <MudCheckBox T="bool" @bind-Value="Question.Required" Label="Required" Class="mt-4" />
     </MudPaper>
 
 @code {
@@ -239,7 +237,6 @@
             }
         }
         else if (Question.Type == QuestionType.SingleChoice ||
-                 Question.Type == QuestionType.Dropdown ||
                  Question.Type == QuestionType.MultiChoice)
         {
             // If the current options match one of the Likert presets, reset them
@@ -274,7 +271,6 @@
         return type switch
         {
             QuestionType.SingleChoice => Icons.Material.Filled.RadioButtonUnchecked,
-            QuestionType.Dropdown => Icons.Material.Filled.ArrowDropDown,
             QuestionType.MultiChoice => Icons.Material.Filled.CheckBoxOutlineBlank,
             _ => Icons.Material.Filled.Label
         };
@@ -308,8 +304,7 @@
             }
         }
         else if (newType == QuestionType.SingleChoice ||
-                 newType == QuestionType.MultiChoice ||
-                 newType == QuestionType.Dropdown)
+                 newType == QuestionType.MultiChoice )
         {
             // Reset to empty options if coming from Likert
             if (Question.Type == QuestionType.LikertScale)

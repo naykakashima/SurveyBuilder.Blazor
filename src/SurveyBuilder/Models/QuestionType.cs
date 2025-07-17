@@ -12,7 +12,6 @@ namespace SurveyBuilder.Models
         OpinionScale,
         LikertScale,
         MultiChoice,
-        Dropdown,
         OpenEnded
     }
 
