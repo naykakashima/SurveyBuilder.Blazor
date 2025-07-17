@@ -1,10 +1,12 @@
 using MudBlazor.Services;
 using SurveyBuilder.DemoApp.Components;
+using SurveyBuilder.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
+builder.Services.AddSurveyBuilder();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
