@@ -9,7 +9,7 @@
     <PackageId>SurveyBuilder</PackageId>
   </PropertyGroup>
   <PropertyGroup>
-    <Version>1.0.3-dev</Version>
+    <Version>1.0.9-dev</Version>
     <Authors>Kay</Authors>
     <Company>KayLabs</Company>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
