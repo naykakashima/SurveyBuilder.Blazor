@@ -1,4 +1,5 @@
-﻿@using global::SurveyBuilder.Models
+﻿@using MudBlazor.Utilities
+@using global::SurveyBuilder.Models
 @using global::SurveyBuilder.Services
 
 @inject IDialogService DialogService
@@ -67,43 +68,88 @@
     </MudStack>
 
     <!-- Survey Questions -->
-    @foreach (var question in Survey.Questions)
-    {
-        <MudPaper Elevation="1" Class="p-3 d-flex justify-between align-center mb-2">
-            <!-- Question Text -->
-            <MudText Typo="Typo.subtitle2" Class="pa-1 flex-grow-1">
-                @(!string.IsNullOrWhiteSpace(question.Text)
-                    ? question.Text
-                    : "Question hasn't been created yet")
-            </MudText>
+    <MudDropContainer 
+        T="SurveyQuestionModel" 
+        Items="Survey.Questions" 
+        ItemsSelector="@( (item, zone) => item.Text == zone )"
+        ItemDropped="ItemUpdated" 
+        Class="d-flex flex-wrap flex-grow-1">
 
-            <!-- Edit / Delete Buttons -->
-            <MudStack Row="true" Spacing="1">
-                <MudButton Size="Size.Small"
-                           Variant="Variant.Filled"
-                           OnClick="@(() => OpenEditorDialog(question))">
-                    Edit
-                </MudButton>
-                <MudButton Size="Size.Small"
-                           Color="Color.Error"
-                           Variant="Variant.Outlined"
-                           OnClick="@(() => RemoveQuestion(question))">
-                    Delete
-                </MudButton>
-            </MudStack>
-        </MudPaper>
-    }
+        <ChildContent>
+           <MudPaper Class="ma-4 flex-grow-1">
+                <MudList T="SurveyQuestionModel" Class="d-flex flex-column mud-height-full">
+                    <MudListSubheader>Drop Zone</MudListSubheader>
+                    <MudDropZone T="SurveyQuestionModel" Identifier="default" Class="flex-grow-1" AllowReorder="true" />
+                </MudList>
+            </MudPaper>
+        </ChildContent>
+        <ItemRenderer>
+            @foreach (var question in Survey.Questions)
+                {
+                    <MudPaper Class="pa-4">
+                        <MudPaper Elevation="1" Class="p-3 d-flex justify-between align-center mb-2">
+                            <!-- Question Text -->
+                            <MudText Typo="Typo.subtitle2" Class="pa-1 flex-grow-1">
+                                @(!string.IsNullOrWhiteSpace(question.Text)
+                                    ? question.Text
+                                    : "Question hasn't been created yet")
+                            </MudText>
+
+                            <!-- Edit / Delete Buttons -->
+                            <MudStack Row="true" Spacing="1">
+                                <MudButton Size="Size.Small"
+                                           Variant="Variant.Filled"
+                                           OnClick="@(() => OpenEditorDialog(question))">
+                                    Edit
+                                </MudButton>
+                                <MudButton Size="Size.Small"
+                                           Color="Color.Error"
+                                           Variant="Variant.Outlined"
+                                           OnClick="@(() => RemoveQuestion(question))">
+                                    Delete
+                                </MudButton>
+                            </MudStack>
+                        </MudPaper>
+                    </MudPaper>
+                }
+        </ItemRenderer>
+    </MudDropContainer>
 </MudPaper>
 
 @code {
     [Parameter] public EventCallback<SurveyModel> SurveyChanged { get; set; }
     private SurveyModel Survey = new(); // main state
     private QuestionType newQuestionType = QuestionType.SingleChoice;
+    private MudDropContainer<SurveyQuestionModel> _container;
+    private List<SurveyQuestionModel> _dropzoneItems = new();
     AlignItems _align = AlignItems.Start;
 
     string savedJson = "";
     bool showLoadDialog = false;
     string loadJsonInput = "";
+
+
+    private void ItemUpdated(MudItemDropInfo<SurveyQuestionModel> dropItem)
+    {
+        dropItem.Item.Order = dropItem.DropzoneIdentifier;
+
+        var indexOffset = dropItem.DropzoneIdentifier switch
+        {
+            "2"  => _dropzoneItems.Count(x => x.Order == "1"),
+            _ => 0
+        };
+
+        _dropzoneItems.UpdateOrder(dropItem, item => item.Order, indexOffset); //TO FIX
+    }
+
+    private void RefreshContainer()
+    {
+        //update the binding to the container
+        StateHasChanged();
+
+        //the container refreshes the internal state
+        _container.Refresh();
+    }
 
     private void NotifyChange()
     {
@@ -119,13 +165,15 @@
 
         Survey.Questions.Add(new SurveyQuestionModel
         {
-            Text = "",
+            Text = "New Question",
             Type = newQuestionType,
             Required = false,
-            Options = new List<string>() // default if needed
+            Options = new List<string>(), 
+            Order = Survey.Questions.Count.ToString() // default if needed
         });
 
         NotifyChange();
+        RefreshContainer();
     }
 
     private void RemoveQuestion(SurveyQuestionModel q)

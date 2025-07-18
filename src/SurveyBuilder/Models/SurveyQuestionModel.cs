@@ -13,7 +13,7 @@ namespace SurveyBuilder.Models
         public QuestionType Type { get; set; }
         public bool Required { get; set; } = false;
         public List<string>? Options { get; set; }
-        public int Order { get; set; }// Used for drag-and-drop reordering in UI
+        public string Order { get; set; }// Used for drag-and-drop reordering in UI
     }
 
 }
