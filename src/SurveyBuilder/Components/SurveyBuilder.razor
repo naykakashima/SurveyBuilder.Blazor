@@ -1,31 +1,35 @@
-﻿@using MudBlazor.Utilities
-@using global::SurveyBuilder.Models
+﻿@using global::SurveyBuilder.Models
 @using global::SurveyBuilder.Services
 
 @inject IDialogService DialogService
 @inject ISurveyJsonService JsonService
 
 <MudStack Row="true" Class="mb-2 justify-end pa-2">
-    <MudButton Variant="Variant.Filled"
+    <MudButton Variant="Variant.Filled" 
                StartIcon="@Icons.Material.Filled.Visibility"
                Color="Color.Primary"
                OnClick="OpenPreviewDialog">
-        Preview Survey
+
+                   Preview Survey
     </MudButton>
 
-    <MudButton Variant="Variant.Filled"
+    <MudButton Variant="Variant.Filled" 
                StartIcon="@Icons.Material.Filled.Save"
                Color="Color.Primary"
                OnClick="SaveSurvey">
-        Save Survey(JSON)
+
+                   Save Survey(JSON)
     </MudButton>
 
-    <MudButton Variant="Variant.Filled"
+    <MudButton Variant="Variant.Filled" 
                StartIcon="@Icons.Material.Filled.FileUpload"
                Color="Color.Primary"
                OnClick="ShowLoadDialog">
-        Load Survey (JSON)
+
+                   Load Survey (JSON)
     </MudButton>
+
+
 </MudStack>
 
 <MudPaper Class="pa-4">
@@ -62,107 +66,71 @@
         }
     </MudStack>
 
-    <!-- Survey Questions with drag-and-reorder -->
-    <MudDropContainer T="SurveyQuestionModel"
-                      Items="Survey.Questions"
-                      @ref="_container"
-                      ItemDropped="OnItemDropped"
-                      Class="d-flex flex-wrap flex-grow-1">
+    <!-- Survey Questions -->
+    @foreach (var question in Survey.Questions)
+    {
+        <MudPaper Elevation="1" Class="p-3 d-flex justify-between align-center mb-2">
+            <!-- Question Text -->
+            <MudText Typo="Typo.subtitle2" Class="pa-1 flex-grow-1">
+                @(!string.IsNullOrWhiteSpace(question.Text)
+                    ? question.Text
+                    : "Question hasn't been created yet")
+            </MudText>
 
-        <!-- Only one drop zone, AllowReorder to true -->
-        <ChildContent>
-            <MudPaper Class="ma-4 flex-grow-1">
-                <MudList T="SurveyQuestionModel" Class="d-flex flex-column mud-height-full">
-                    <MudListSubheader>Reorder Questions</MudListSubheader>
-                    <MudDropZone T="SurveyQuestionModel"
-                                 Identifier="default"
-                                 AllowReorder="true"
-                                 Class="d-flex flex-wrap flex-grow-1" />
-                </MudList>
-            </MudPaper>
-        </ChildContent>
-
-        <!-- Render each question -->
-        <ItemRenderer>
-            <MudPaper Class="pa-4 ma-2" Elevation="1">
-                <MudStack Row="true" AlignItems="_align">
-                    <MudIcon Icon="@Icons.Material.Filled.DragHandle" Class="mr-2 cursor-move" />
-                    <MudText Typo="Typo.subtitle2" Class="flex-grow-1">
-                        @(!string.IsNullOrWhiteSpace(context.Text)
-                            ? context.Text
-                            : "(No question text yet)")
-                    </MudText>
-                    <MudButton Size="Size.Small"
-                               Variant="Variant.Filled"
-                               OnClick="@(() => OpenEditorDialog(context))">
-                        Edit
-                    </MudButton>
-                    <MudButton Size="Size.Small"
-                               Color="Color.Error"
-                               Variant="Variant.Outlined"
-                               OnClick="@(() => RemoveQuestion(context))">
-                        Delete
-                    </MudButton>
-                </MudStack>
-            </MudPaper>
-        </ItemRenderer>
-    </MudDropContainer>
+            <!-- Edit / Delete Buttons -->
+            <MudStack Row="true" Spacing="1">
+                <MudButton Size="Size.Small"
+                           Variant="Variant.Filled"
+                           OnClick="@(() => OpenEditorDialog(question))">
+                    Edit
+                </MudButton>
+                <MudButton Size="Size.Small"
+                           Color="Color.Error"
+                           Variant="Variant.Outlined"
+                           OnClick="@(() => RemoveQuestion(question))">
+                    Delete
+                </MudButton>
+            </MudStack>
+        </MudPaper>
+    }
 </MudPaper>
 
 @code {
     [Parameter] public EventCallback<SurveyModel> SurveyChanged { get; set; }
-    private SurveyModel Survey = new();
-    private AlignItems _align = AlignItems.Center;
-    private MudDropContainer<SurveyQuestionModel> _container;
-    private SurveyModel _tempData = new();
-    private string savedJson = "";
-    private bool showLoadDialog = false;
-    private string loadJsonInput = "";
+    private SurveyModel Survey = new(); // main state
+    private QuestionType newQuestionType = QuestionType.SingleChoice;
+    AlignItems _align = AlignItems.Start;
 
-    private void OnItemDropped(MudItemDropInfo<SurveyQuestionModel> dropItem)
-    {
-        // Update the order of items based on their new positions
-        Survey.Questions.UpdateOrder(dropItem, q => q.Order);
-        // Reassign sequential Order indices
-        for (int i = 0; i < Survey.Questions.Count; i++)
-            Survey.Questions[i].Order = i;
-
-        NotifyChange();
-        RefreshContainer();
-    }
-
-    private void RefreshContainer()
-    {
-        StateHasChanged();
-        _container.Refresh();
-    }
+    string savedJson = "";
+    bool showLoadDialog = false;
+    string loadJsonInput = "";
 
     private void NotifyChange()
     {
         if (SurveyChanged.HasDelegate)
+        {
             SurveyChanged.InvokeAsync(Survey);
+        }
     }
 
     private void AddQuestion()
     {
-        if (Survey.Questions.Count >= 10)
-            return;
+        if (Survey.Questions.Count >= 10) return;
 
         Survey.Questions.Add(new SurveyQuestionModel
         {
-            Text = "New Question",
-            Order = Survey.Questions.Count
+            Text = "",
+            Type = newQuestionType,
+            Required = false,
+            Options = new List<string>() // default if needed
         });
+
         NotifyChange();
-        RefreshContainer();
     }
 
     private void RemoveQuestion(SurveyQuestionModel q)
     {
         Survey.Questions.Remove(q);
-        // Reassign Order after removal
-        for (int i = 0; i < Survey.Questions.Count; i++)
-            Survey.Questions[i].Order = i;
         NotifyChange();
     }
 
@@ -172,19 +140,25 @@
         {
             { x => x.OriginalQuestion, question }
         };
-        var options = new DialogOptions
-        {
-            CloseButton = true,
-            MaxWidth = MaxWidth.Medium,
+
+        var options = new DialogOptions 
+        { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Medium, 
             FullWidth = true,
             CloseOnEscapeKey = true
         };
+
         var dialog = await DialogService.ShowAsync<QuestionEditorDialog>("Edit Question", parameters, options);
         var result = await dialog.Result;
+
         if (!result.Canceled && result.Data is SurveyQuestionModel updated)
         {
-            var idx = Survey.Questions.IndexOf(question);
-            if (idx >= 0) Survey.Questions[idx] = updated;
+            var index = Survey.Questions.IndexOf(question);
+            if (index != -1)
+            {
+                Survey.Questions[index] = updated;
+            }
         }
         NotifyChange();
     }
@@ -195,36 +169,34 @@
         {
             { x => x.Survey, Survey }
         };
+
         var options = new DialogOptions
         {
             FullWidth = true,
             MaxWidth = MaxWidth.Large,
             CloseOnEscapeKey = true
         };
+
         await DialogService.ShowAsync<SurveyPreviewDialog>("Preview Survey", parameters, options);
     }
 
-    private void SaveSurvey()
+    void SaveSurvey()
     {
-        var orderedSurvey = new SurveyModel
-        {
-            Title = Survey.Title,
-            Description = Survey.Description,
-            Questions = Survey.Questions
-                .OrderBy(q => q.Order)
-                .ToList()
-        };
-
-        savedJson = JsonService.Serialize(orderedSurvey);
+        savedJson = JsonService.Serialize(Survey);
         NotifyChange();
     }
 
-    private void ShowLoadDialog() => showLoadDialog = true;
+    void ShowLoadDialog()
+    {
+        showLoadDialog = true;
+    }
 
-    private void LoadSurvey()
+    void LoadSurvey()
     {
         Survey = JsonService.Deserialize(loadJsonInput);
         showLoadDialog = false;
         NotifyChange();
+
     }
+
 }
