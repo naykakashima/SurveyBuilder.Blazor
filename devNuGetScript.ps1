@@ -68,12 +68,7 @@ Write-Host "`n🔁 Refreshing package in host app..." -ForegroundColor Cyan
 Push-Location $hostAppPath
 
 dotnet remove package SurveyBuilder
-dotnet add package SurveyBuilder --source ../../nupkg --prerelease
 
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Package re-added in host app!" -ForegroundColor Green
-} else {
-    Write-Host "❌ Failed to add package in host app." -ForegroundColor Red
-}
+Write-Host "✅ Add Package To Host Package Using NuGet Package Manager" -ForegroundColor Green
 
 Pop-Location
