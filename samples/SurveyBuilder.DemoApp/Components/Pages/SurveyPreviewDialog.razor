@@ -1,0 +1,46 @@
+﻿@using SurveyBuilder.Models
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6">@Survey.Title</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">@Survey.Description</MudText>
+
+        <MudDivider Class="my-2" />
+
+        @if (Survey.Questions.Count == 0)
+        {
+            <MudText>No questions in this survey.</MudText>
+        }
+        else
+        {
+            @foreach (var q in Survey.Questions)
+            {
+                <MudPaper Class="mb-2 pa-3">
+                    <MudText Typo="Typo.subtitle2">@q.Text</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Type: @q.Type</MudText>
+                    @if (q.Options?.Count > 0)
+                    {
+                        <MudList T="string">
+                            @foreach (var opt in q.Options)
+                            {
+                                <MudListItem>@opt</MudListItem>
+                            }
+                        </MudList>
+                    }
+                </MudPaper>
+            }
+        }
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public SurveyModel Survey { get; set; } = new();
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+}

@@ -1,31 +1,105 @@
-﻿@* List Surveys from the survey repository persistence function*@
+﻿@*List to display surveys*@
 
 @page "/listsurveys"
 @using SurveyBuilder.DemoApp.Components.Infrastructure
+@using SurveyBuilder.Models
 @using MudBlazor
 @inject ISurveyRepository Repo
+@inject NavigationManager Nav
+@inject IDialogService DialogService
 
 <PageTitle>Surveys</PageTitle>
 
-<MudButton OnClick="@(() => Nav.NavigateTo("/listsurveys/createsurvey"))">Create New Survey</MudButton>
+<MudPaper Class="p-4 pa-5">
+    <MudStack Row="true" Class="d-flex align-center mb-4 justify-space-between">
+        <MudText Typo="Typo.h5">Your Surveys</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" Class="pa-2"
+                   OnClick="@(() => Nav.NavigateTo("/listsurveys/createsurvey"))">
+            Create New Survey
+        </MudButton>
+    </MudStack>
 
-@if (Repo.GetAll().Count == 0)
-{
-    <MudText>No surveys yet.</MudText>
-}
-else
-{
-    <MudList T="string">
-        @foreach (var survey in Repo.GetAll())
-        {
-            <MudListItem>
-                <MudText>@survey.Title</MudText>
-                <MudButton OnClick="@(() => Nav.NavigateTo($"/listsurveys/edit/{survey.Id}"))">Edit</MudButton>
-            </MudListItem>
-        }
-    </MudList>
-}
+    @if (Repo.GetAll().Count == 0)
+    {
+        <MudPaper Class="pa-10 text-center">
+            <MudText Typo="Typo.subtitle1" Color="Color.Secondary">
+                No surveys created yet. Click "Create New Survey" to get started.
+            </MudText>
+        </MudPaper>
+    }
+    else
+    {
+        <MudPaper Class="pa-0">
+            @foreach (var survey in Repo.GetAll())
+            {
+                <MudDivider />
+
+                <MudStack Row="true" Class="d-flex align-center p-3 hover:bg-grey-lighten-3 transition-all justify-space-between">
+                    <MudStack Row="false" Spacing="1">
+                        <MudText Typo="Typo.subtitle1">@survey.Title</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@survey.Description</MudText>
+                    </MudStack>
+
+                    <MudStack Row="true" Spacing="3">
+
+                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Visibility"
+                                   OnClick="@(() => OpenPreviewDialog(survey))">
+                            Preview
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Edit"
+                                   OnClick="@(() => Nav.NavigateTo($"/listsurveys/edit/{survey.Id}"))">
+                            Edit
+                        </MudButton>
+
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Delete"
+                                   OnClick="@(() => ConfirmDelete(survey))">
+                            Delete
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            }
+
+            <MudDivider />
+        </MudPaper>
+    }
+</MudPaper>
 
 @code {
-    [Inject] NavigationManager Nav { get; set; }
+    private async Task ConfirmDelete(SurveyModel survey)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        bool? confirmed = await DialogService.ShowMessageBox(
+            title: "Delete Survey",
+            markupMessage: (MarkupString)$"Are you sure you want to delete <b>{survey.Title}</b>?",
+            yesText: "Delete", noText: "Cancel",
+            options: options
+        );
+
+        if (confirmed == true)
+        {
+            Repo.Delete(survey.Id);
+            StateHasChanged();
+        }
+    }
+
+    private async Task OpenPreviewDialog(SurveyModel survey)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Survey", survey }
+        };
+
+        var options = new DialogOptions
+        {
+            FullWidth = true,
+            MaxWidth = MaxWidth.Medium,
+            CloseOnEscapeKey = true
+        };
+
+        await DialogService.ShowAsync<SurveyPreviewDialog>("Preview Survey", parameters, options);
+    }
 }
