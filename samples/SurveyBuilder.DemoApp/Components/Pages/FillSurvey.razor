@@ -1,0 +1,68 @@
+﻿@page "/listavailablesurveys/fillsurvey/{Id}"
+@using SurveyBuilder.DemoApp.Components.Infrastructure
+@using SurveyBuilder.Models
+@inject ISurveyRepository Repo
+
+<PageTitle>Fill Survey</PageTitle>
+
+@if (IsLoading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (Survey == null)
+{
+    <MudText Color="Color.Error">Survey not found.</MudText>
+}
+else
+{
+    <MudText Typo="Typo.h5">@Survey.Title</MudText>
+    <MudText Typo="Typo.subtitle2" Class="mb-4">@Survey.Description</MudText>
+
+    <!-- TODO: Render dynamic questions here -->
+
+
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitSurvey">Submit</MudButton>
+}
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+
+    private SurveyModel? Survey;
+    private SurveyResponseModel Response = new();
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load the survey
+        Survey = Repo.GetById(Id); // Could be async in future
+
+        if (Survey != null)
+        {
+            // Initialize the response map
+            Response.SurveyId = Survey.Id;
+            foreach (var q in Survey.Questions)
+            {
+                Response.Answers[q.Id] = null!;
+            }
+        }
+
+        IsLoading = false;
+    }
+
+    private void SubmitSurvey()
+    {
+        // We'll wire up validation and export logic later
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(Response));
+    }
+
+    private object? GetAnswer(string questionId)
+    {
+        return Response.Answers.TryGetValue(questionId, out var value) ? value : null;
+    }
+
+    private void SetAnswer(string questionId, object? value)
+    {
+        Response.Answers[questionId] = value!;
+    }
+}
