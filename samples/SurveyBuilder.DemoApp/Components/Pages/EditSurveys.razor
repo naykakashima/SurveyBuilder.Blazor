@@ -1,0 +1,50 @@
+﻿@page "/listsurveys/edit/{Id}"
+@using SurveyBuilder.DemoApp.Components.Infrastructure
+@using SurveyBuilder.Models
+@using SurveyBuilder.Services
+@inject ISurveyRepository Repo
+@inject ISurveyJsonService JsonService
+@inject NavigationManager Nav
+
+<h3>Edit Survey</h3>
+
+@if (Survey == null)
+{
+    <MudText Color="Color.Error">Survey not found</MudText>
+}
+else
+{
+    <SurveyBuilderEditor Survey="Survey" SurveyChanged="OnSurveyChanged" />
+    <MudButton OnClick="Save">Save</MudButton>
+}
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    private SurveyModel? Survey;
+
+    protected override void OnInitialized()
+    {
+        var loaded = Repo.GetById(Id);
+
+        if (loaded is not null)
+        {
+            // Detach from repo to prevent accidental mutation
+            Survey = JsonService.Deserialize(JsonService.Serialize(loaded));
+        }
+    }
+
+    private Task OnSurveyChanged(SurveyModel updated)
+    {
+        Survey = updated;
+        return Task.CompletedTask;
+    }
+
+    private void Save()
+    {
+        if (Survey is not null)
+        {
+            Repo.Update(Survey);
+            Nav.NavigateTo("/listsurveys");
+        }
+    }
+}

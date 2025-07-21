@@ -1,8 +1,12 @@
 using MudBlazor.Services;
 using SurveyBuilder.DemoApp.Components;
+using SurveyBuilder.DemoApp.Components.Infrastructure;
 using SurveyBuilder.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//register persistence services
+builder.Services.AddSingleton<ISurveyRepository, InMemorySurveyRepository>();
 
 // Add MudBlazor services
 builder.Services.AddMudServices();

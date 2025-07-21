@@ -1,0 +1,31 @@
+﻿@* List Surveys from the survey repository persistence function*@
+
+@page "/listsurveys"
+@using SurveyBuilder.DemoApp.Components.Infrastructure
+@using MudBlazor
+@inject ISurveyRepository Repo
+
+<PageTitle>Surveys</PageTitle>
+
+<MudButton OnClick="@(() => Nav.NavigateTo("/listsurveys/createsurvey"))">Create New Survey</MudButton>
+
+@if (Repo.GetAll().Count == 0)
+{
+    <MudText>No surveys yet.</MudText>
+}
+else
+{
+    <MudList T="string">
+        @foreach (var survey in Repo.GetAll())
+        {
+            <MudListItem>
+                <MudText>@survey.Title</MudText>
+                <MudButton OnClick="@(() => Nav.NavigateTo($"/listsurveys/edit/{survey.Id}"))">Edit</MudButton>
+            </MudListItem>
+        }
+    </MudList>
+}
+
+@code {
+    [Inject] NavigationManager Nav { get; set; }
+}

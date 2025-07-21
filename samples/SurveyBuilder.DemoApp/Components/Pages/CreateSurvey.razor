@@ -1,5 +1,11 @@
-﻿@page "/createsurvey"
+﻿@*
+    Demo page which demonstrates how to create a survey
+    accessible through /listsurveys
+*@
+
+@page "/listsurveys/createsurvey"
 @using SurveyBuilder.Components
+@using SurveyBuilder.DemoApp.Components.Infrastructure
 @using SurveyBuilder.Models
 @using SurveyBuilder.Services
 @inject ISurveyJsonService JsonService
@@ -16,6 +22,9 @@
 <MudButton OnClick="SaveToDb" Color="Color.Primary" Class="mt-2">Save to DB</MudButton>
 
 @code {
+    [Inject] NavigationManager Nav { get; set; }
+    [Inject] ISurveyRepository Repo { get; set; }
+
     private SurveyModel? CurrentSurvey;
     private string Serialized = "";
 
@@ -28,9 +37,16 @@
 
     private Task SaveToDb()
     {
-        // TODO: Send `CurrentSurvey` to DB via API or EF
+        if (CurrentSurvey is null)
+            return Task.CompletedTask;
+
         Console.WriteLine("Save triggered:");
         Console.WriteLine(Serialized);
+
+        CurrentSurvey.Id = Guid.NewGuid().ToString();
+        Repo.Add(CurrentSurvey);
+        Nav.NavigateTo("/listsurveys");
+
         return Task.CompletedTask;
     }
 }

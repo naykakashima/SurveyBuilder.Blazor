@@ -1,0 +1,14 @@
+﻿@using global::SurveyBuilder.Models
+@using global::SurveyBuilder.Services
+@inject ISurveyJsonService JsonService
+@inject IDialogService DialogService
+
+<MudPaper Class="pa-4">
+    <SurveyBuilder Survey="Survey" SurveyChanged="SurveyChanged" />
+</MudPaper>
+
+@code {
+    [Parameter] public SurveyModel Survey { get; set; } = new();
+    [Parameter] public EventCallback<SurveyModel> SurveyChanged { get; set; }
+}
+

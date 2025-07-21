@@ -97,7 +97,7 @@
 
 @code {
     [Parameter] public EventCallback<SurveyModel> SurveyChanged { get; set; }
-    private SurveyModel Survey = new(); // main state
+    [Parameter] public SurveyModel Survey { get; set; } = new(); // external input
     private QuestionType newQuestionType = QuestionType.SingleChoice;
     AlignItems _align = AlignItems.Start;
 
