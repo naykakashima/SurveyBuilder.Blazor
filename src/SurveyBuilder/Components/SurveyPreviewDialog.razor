@@ -1,5 +1,6 @@
 ﻿@using MudBlazor
 @using global::SurveyBuilder.Models
+@inject ISnackbar Snackbar
 
 <MudDialog>
     <DialogContent>
@@ -27,16 +28,25 @@
                             @switch (question.Type)
                             {
                                 case QuestionType.OpenEnded:
-                                    <MudTextField T="string" Placeholder="User answer here..." Lines="3" Disabled="true" FullWidth="true" />
+                                    <MudTextField T="string" Placeholder="User answer here..." Lines="3" Disabled="false" FullWidth="true" />
                                     break;
 
                                 case QuestionType.OpinionScale:
-                                    <MudSlider Min="1" Max="5" Value="3" Disabled="true" />
+                                    <MudStack>
+                                        <MudSlider Min="1" Max="5" Value="3" Step="1" TickMarks="true" />
+                                        <MudStack Row="true" Class="d-flex justify-space-between">
+                                            <MudText Typo="Typo.caption">1</MudText>
+                                            <MudText Typo="Typo.caption">2</MudText>
+                                            <MudText Typo="Typo.caption">3</MudText>
+                                            <MudText Typo="Typo.caption">4</MudText>
+                                            <MudText Typo="Typo.caption">5</MudText>
+                                        </MudStack>
+                                    </MudStack>
                                     break;
 
                                 case QuestionType.LikertScale:
                                 case QuestionType.SingleChoice:
-                                    <MudRadioGroup T="string" Disabled="true">
+                                    <MudRadioGroup T="string" Disabled="false">
                                         @foreach (var opt in question.Options)
                                         {
                                             <MudRadio T="string" Value="@opt">@opt</MudRadio>
@@ -47,7 +57,7 @@
                                 case QuestionType.MultiChoice:
                                     @foreach (var opt in question.Options)
                                     {
-                                        <MudCheckBox T="bool" Label="@opt" Disabled="true" />
+                                        <MudCheckBox T="bool" Label="@opt" Disabled="false" />
                                     }
                                     break;
                             }
@@ -64,11 +74,17 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton OnClick="() => MudDialog.Cancel()">Close</MudButton>
+        <MudButton Color="Color.Primary" OnClick="HandleSubmit">Submit</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public SurveyModel Survey { get; set; } = null!;
+
+    private void HandleSubmit()
+    {
+        Snackbar.Add("Survey preview complete!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
 }

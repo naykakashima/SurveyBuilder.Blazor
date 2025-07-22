@@ -1,46 +1,89 @@
 ﻿@using SurveyBuilder.Models
-@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h6">@Survey.Title</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary">@Survey.Description</MudText>
-
-        <MudDivider Class="my-2" />
+        <MudText Typo="Typo.h5" Class="mb-1">@Survey.Title</MudText>
+        <MudText Typo="Typo.subtitle2" Class="mb-4">@Survey.Description</MudText>
 
         @if (Survey.Questions.Count == 0)
         {
-            <MudText>No questions in this survey.</MudText>
+            <MudText Typo="Typo.body1">No Questions Added Yet</MudText>
         }
         else
         {
-            @foreach (var q in Survey.Questions)
-            {
-                <MudPaper Class="mb-2 pa-3">
-                    <MudText Typo="Typo.subtitle2">@q.Text</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Type: @q.Type</MudText>
-                    @if (q.Options?.Count > 0)
-                    {
-                        <MudList T="string">
-                            @foreach (var opt in q.Options)
+            <MudStack Spacing="2">
+                @for (int i = 0; i < Survey.Questions.Count; i++)
+                {
+                    var question = Survey.Questions[i];
+                    var currentIndex = i + 1;
+
+                    <MudPaper Class="pa-4" Elevation="1" Style="border-left: 4px solid #1976d2;">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.subtitle1" Class="font-weight-bold">
+                                @($"{currentIndex}. {question.Text}")
+                            </MudText>
+
+                            @switch (question.Type)
                             {
-                                <MudListItem>@opt</MudListItem>
+                                case QuestionType.OpenEnded:
+                                    <MudTextField T="string" Placeholder="User answer here..." Lines="3" FullWidth="true" />
+                                    break;
+
+                                case QuestionType.OpinionScale:
+                                    <MudStack>
+                                        <MudSlider Min="1" Max="5" Value="3" Step="1" TickMarks="true" />
+                                        <MudStack Row="true" Class="d-flex justify-space-between">
+                                            <MudText Typo="Typo.caption">1</MudText>
+                                            <MudText Typo="Typo.caption">2</MudText>
+                                            <MudText Typo="Typo.caption">3</MudText>
+                                            <MudText Typo="Typo.caption">4</MudText>
+                                            <MudText Typo="Typo.caption">5</MudText>
+                                        </MudStack>
+                                    </MudStack>
+                                    break;
+
+                                case QuestionType.LikertScale:
+                                case QuestionType.SingleChoice:
+                                    <MudRadioGroup T="string">
+                                        @foreach (var opt in question.Options)
+                                        {
+                                            <MudRadio T="string" Value="@opt">@opt</MudRadio>
+                                        }
+                                    </MudRadioGroup>
+                                    break;
+
+                                case QuestionType.MultiChoice:
+                                    @foreach (var opt in question.Options)
+                                    {
+                                        <MudCheckBox T="bool" Label="@opt" />
+                                    }
+                                    break;
                             }
-                        </MudList>
-                    }
-                </MudPaper>
-            }
+
+                            @if (question.Required)
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Error">* Required</MudText>
+                            }
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudStack>
         }
     </DialogContent>
 
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="Close">Close</MudButton>
+        <MudButton Color="Color.Primary" OnClick="HandleSubmit">Submit</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public SurveyModel Survey { get; set; } = new();
-    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void HandleSubmit()
+    {
+        Snackbar.Add("Survey preview complete!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
 }
