@@ -1,3 +1,34 @@
 ﻿@page "/"
+@using SurveyBuilder.Models
+@inject NavigationManager Nav
 
-<h3>Asssalamalikum</h3>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-12">
+    <MudPaper Class="p-6">
+        <MudText Typo="Typo.h4" GutterBottom="true">🧩 SurveyBuilder Demo</MudText>
+        <MudText Typo="Typo.subtitle1" Class="mb-4">
+            Build, preview, and render interactive forms using <strong>SurveyBuilder.Blazor</strong>.
+        </MudText>
+
+        <MudDivider Class="my-4" />
+
+        <MudStack Spacing="2">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Nav.NavigateTo("/listsurveys/createsurvey"))">
+                ➕ Create New Survey
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => Nav.NavigateTo("/listsurveys"))">
+                📋 Manage Existing Surveys
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled" OnClick="@(() => Nav.NavigateTo("/listavailablesurveys"))">
+                👀 Fill Up Surveys (Read-Only)
+            </MudButton>
+        </MudStack>
+
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            This app uses a local, in-memory persistence service. No backend required.
+        </MudText>
+    </MudPaper>
+</MudContainer>
