@@ -100,10 +100,29 @@ private Task OnSurveyChanged(SurveyModel survey)
 ```
 
 ### Editing a Survey
-The package provides UI components for visual survey editing:
+The DemoApp provides an example of how persistence could be incorporated via parent-child parameter bind between editing and creating the surveys
 
 ```razor
-<SurveyEditor Survey="@survey" OnSurveyChanged="@HandleSurveyChange" />
+<SurveyBuilderEditor Survey="Survey" SurveyChanged="OnSurveyChanged" />
+
+@code{
+	protected override void OnInitialized()
+	{
+		var loaded = Repo.GetById(Id);
+
+		if (loaded is not null)
+		{
+			// Detach from repo to prevent accidental mutation
+			Survey = JsonService.Deserialize(JsonService.Serialize(loaded));
+		}
+	}
+
+	private Task OnSurveyChanged(SurveyModel updated)
+	{
+		Survey = updated;
+		return Task.CompletedTask;
+	}
+}
 ```
 
 ## Filling Up The Survey
