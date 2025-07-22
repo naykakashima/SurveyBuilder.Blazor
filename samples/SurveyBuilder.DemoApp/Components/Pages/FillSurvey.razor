@@ -20,7 +20,64 @@ else
 
     <!-- TODO: Render dynamic questions here -->
 
+    <MudStack Spacing="2">
+        @foreach (var question in Survey.Questions)
+        {
+            @switch (question.Type)
+            {
+                case QuestionType.OpenEnded:
+                    <MudTextField T="string"
+                    Placeholder="Type your answer here..."
+                    Value="@GetString(question.Id)"
+                    ValueChanged="val => SetString(question.Id, val)"
+                    />
+                    break;
 
+
+                case QuestionType.SingleChoice:
+                    <MudRadioGroup T="string"
+                    Value="@GetString(question.Id)"
+                    ValueChanged="@(val => SetString(question.Id, val))">
+                        @foreach (var option in question.Options!)
+                        {
+                            <MudRadio T="string" Value="@option" Label="@option"/>
+                        }
+                    </MudRadioGroup>
+                    break;
+
+                case QuestionType.OpinionScale:
+                    <MudSlider Min="1" 
+                               Max="10"
+                               Value="@(GetNullableInt(question.Id) ?? 5)"
+                               ValueChanged="@((int val) => SetAnswer(question.Id, val))"
+                               Immediate="true"/>
+                    <MudText>Selected: @(GetNullableInt(question.Id) ?? 5)/10</MudText>
+                    break;
+
+                case QuestionType.LikertScale:
+                    <MudRadioGroup T="string"
+                                  Value="@GetString(question.Id)"
+                                  ValueChanged="@(val => SetString(question.Id, val))">
+                        @foreach (var option in question.Options!)
+                        {
+                            <MudRadio T="string" Value="@option" Label="@option"/>
+                        }
+                    </MudRadioGroup>
+                    break;
+
+
+                case QuestionType.MultiChoice:
+                    @foreach (var option in question.Options!)
+                    {
+                        <MudCheckBox T="bool"
+                                    Label="@option"
+                                    Value="@(GetList(question.Id).Contains(option))"
+                                    ValueChanged="@((bool val) => OnMultiChoiceChanged(question.Id, option, val))"/>
+                    }
+                    break;
+            }
+        }
+    </MudStack>
 
     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitSurvey">Submit</MudButton>
 }
@@ -56,13 +113,30 @@ else
         Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(Response));
     }
 
-    private object? GetAnswer(string questionId)
+    int? GetNullableInt(string id) => GetAnswer(id) as int?;
+
+    object? GetAnswer(string id) => Response.Answers.TryGetValue(id, out var val) ? val : null;
+
+    void SetAnswer(string id, object? value) => Response.Answers[id] = value!;
+
+    string? GetString(string id) => GetAnswer(id) as string;
+    void SetString(string id, string val) => SetAnswer(id, val);
+
+    int GetInt(string id) => (int)(GetAnswer(id) ?? 5);
+    void SetInt(string id, object value) => SetAnswer(id, Convert.ToInt32(value));
+
+    List<string> GetList(string id) => GetAnswer(id) as List<string> ?? new();
+    void ToggleListItem(string id, string item, bool isChecked) => SetAnswer(id, item);
+
+    void OnMultiChoiceChanged(string id, string option, bool isChecked)
     {
-        return Response.Answers.TryGetValue(questionId, out var value) ? value : null;
+        var list = GetList(id);
+        if (isChecked && !list.Contains(option))
+            list.Add(option);
+        else if (!isChecked && list.Contains(option))
+            list.Remove(option);
+
+        SetAnswer(id, list);
     }
 
-    private void SetAnswer(string questionId, object? value)
-    {
-        Response.Answers[questionId] = value!;
-    }
 }

@@ -8,7 +8,7 @@ namespace SurveyBuilder.Models
 {
     public class SurveyResponseModel
     {
-        public string SurveyId { get; set; } = string.Empty;
+        public string SurveyId { get; set; } = Guid.NewGuid().ToString();
 
         // Core of the answer map
         public Dictionary<string, object> Answers { get; set; } = new();

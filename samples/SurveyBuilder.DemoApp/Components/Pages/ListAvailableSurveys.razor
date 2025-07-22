@@ -1,0 +1,34 @@
+﻿@page "/listavailablesurveys"
+@using SurveyBuilder.Models
+@using SurveyBuilder.DemoApp.Components.Infrastructure
+@inject ISurveyRepository Repo
+@inject NavigationManager Nav
+
+<PageTitle>Available Surveys</PageTitle>
+
+<MudPaper Class="p-4 pa-5">
+    <MudText Typo="Typo.h5" Class="mb-4">Available Surveys</MudText>
+
+    @if (Repo.GetAll().Count == 0)
+    {
+        <MudText>No surveys available at the moment.</MudText>
+    }
+    else
+    {
+        @foreach (var survey in Repo.GetAll())
+        {
+            <MudCard Class="mb-3">
+                <MudCardContent>
+                    <MudText Typo="Typo.subtitle1">@survey.Title</MudText>
+                    <MudText Typo="Typo.body2">@survey.Description</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="@(() => Nav.NavigateTo($"/listavailablesurveys/fillsurvey/{survey.Id}"))">
+                        Fill Survey
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        }
+    }
+</MudPaper>
