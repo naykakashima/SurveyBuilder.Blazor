@@ -1,63 +1,117 @@
-﻿# SurveyBuilder.Blazor
+# SurveyBuilder.Blazor
 
-A lightweight, extensible form builder for Blazor projects.  
-Create, edit, and render surveys using a structured model. Built for reuse across apps.
+A lightweight, extensible survey/form builder for Blazor applications. Create, edit, and manage surveys with a structured model that serializes to JSON for easy storage and retrieval.
 
-## 📦 Installation
+## Features
 
-Add it via NuGet:
+- 🏗️ Build surveys programmatically or through UI
+- ✏️ Edit existing surveys 
+- 👁️ Real-time preview of survey forms
+- 💾 JSON serialization/deserialization for easy storage
+- 📝 Support for multiple question types:
+  - Single choice (radio buttons)
+  - Multiple choice (checkboxes)
+  - Open-ended (text input)
+  - Opinion scales (sliders)
+  - Likert scales
+- 🎨 Built with MudBlazor for a polished UI
 
-```sh
+## Installation
+
+Add the package via NuGet:
+
+```bash
 dotnet add package SurveyBuilder.Blazor
 ```
 
-Or edit your .csproj:
+Or add directly to your .csproj file:
 
-```C#
+```bash
 <PackageReference Include="SurveyBuilder.Blazor" Version="1.1.*" />
 ```
 
+## Core Concepts
 
-## ⚙️ Usage
-You can build surveys with the SurveyBuilder and render them in your host project (examples in samples/SurveyBuilder.DemoApp)
+### Survey Structure
 
-Surveys are exported as JSON blobs.
+- ```SurveyModel```: The root container for your survey 
+	- Title and description
+	- Collection of questions
+
+- ```SurveyQuestionModel```: Defines individual questions
+	- Question text
+	- Question type
+	- Options (for choice-based questions)
+	- Required flag
 
 
-## 🧱 Defining a Survey
+## Basic Usage
 
-Use the SurveyModel, SurveyPage, and SurveyQuestion classes to build a form programmatically.
+### Creating a Survey
+```csharp
+var survey = new SurveyModel
+{
+    Title = "Customer Satisfaction Survey",
+    Description = "Help us improve our services",
+    Questions = new List<SurveyQuestionModel>
+    {
+        new()
+        {
+            Text = "How satisfied are you with our product?",
+            Type = QuestionType.OpinionScale,
+            Required = true
+        },
+        new()
+        {
+            Text = "What features would you like to see added?",
+            Type = QuestionType.OpenEnded
+        }
+    }
+};
 
-You can save this to storage or serialize to JSON.
+// Serialize to JSON
+var json = JsonService.Serialize(survey);
+```
 
+### Editing a Survey
+The package provides UI components for visual survey editing:
 
+```razor
+<SurveyEditor Survey="@survey" OnSurveyChanged="@HandleSurveyChange" />
+```
 
-## 🧪 Demo Project
-The repository includes a sample Blazor demo:
+### Rendering a Survey
+Display surveys to end-users:
 
-📁 samples/SurveyBuilder.DemoApp
+```razor
+<SurveyRenderer Survey="@survey" OnSubmit="@HandleSurveySubmission" />
+```
 
-Run it with:
+## Demo Application
+The repository includes a sample Blazor application demonstrating:
+- Survey creation/editing interface
+- Survey preview functionality
+- JSON import/export
+- Survey response collection
+
+### To run the demo:
+
 ```bash
 dotnet run --project samples/SurveyBuilder.DemoApp
 ```
+### Extending Functionality
+- Implement these interfaces for custom behavior:
+	- ISurveyJsonService: Custom JSON serialization
+	- ISurveyRepository: Custom survey storage
 
-This shows how to:
-- Create/edit surveys with drag-and-drop
-- Preview rendered forms
-- Save/load surveys to memory
-- Submit answers and receive results
 
-## 💡 Customization
-The package is designed to be extended. You can:
+## Roadmap
+- Enhanced drag-and-drop UI
+- Validation support 
+- Markdown formatting in labels
+- Comprehensive documentation website
+- Additional question types
+- Survey analytics
 
-- Use your own persistence logic via ISurveyJsonService
-
-## 📌 Roadmap
- UI polish and better drag/drop feedback
-
- Validation support
-
- Markdown support in labels
-
- Docs website
+## Contributing
+Contributions are welcome! Please open issues for feature requests or bug reports.
