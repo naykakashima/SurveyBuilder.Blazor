@@ -1,0 +1,28 @@
+﻿@using MudBlazor
+
+@inject IDialogService DialogService
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+
+<MudDialog Style="width: 800px; max-width: 90vw;">
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-2">JSON output will look like this:</MudText>
+        <MudTextField @bind-value="@FormattedJson" Lines="15" FullWidth="true" ReadOnly="true" />
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public string FormattedJson { get; set; } = string.Empty;
+
+    private void Cancel() => MudDialog.Cancel();
+    private void Submit()
+    {
+        Snackbar.Add("Survey submitted!", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(true));
+    } 
+}
