@@ -19,7 +19,11 @@
 <MudText Typo="Typo.subtitle2" Class="mt-4">Serialized Output:</MudText>
 <MudTextField @bind-Value="Serialized" Lines="20" FullWidth="true" ReadOnly="true" />
 
-<MudButton OnClick="SaveToDb" Color="Color.Primary" Class="mt-2">Save to DB</MudButton>
+<MudStack Class="d-flex justify-center mt-4">
+    <MudButton OnClick="SaveToDb" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" StartIcon="@Icons.Material.Filled.Save">
+        Save to DB
+    </MudButton>
+</MudStack>
 
 @code {
     [Inject] NavigationManager Nav { get; set; }
