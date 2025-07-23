@@ -2,33 +2,43 @@
 @using SurveyBuilder.Models
 @inject NavigationManager Nav
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-12">
-    <MudPaper Class="p-6">
-        <MudText Typo="Typo.h4" GutterBottom="true">🧩 SurveyBuilder Demo</MudText>
-        <MudText Typo="Typo.subtitle1" Class="mb-4">
-            Build, preview, and render interactive forms using <strong>SurveyBuilder.Blazor</strong>.
-        </MudText>
+<MudContainer MaxWidth="MaxWidth.False" Style="min-height: 100vh;" Class="pa-4">
+    <MudGrid Justify="Justify.Center" Class="d-flex align-center" Style="min-height: 100%;">
+        <MudItem xs="12" sm="10" md="8" lg="6" xl="4">
+            <MudPaper Elevation="3" Class="p-8 text-center" Style="width: 100%; max-width: 600px;">
+                <MudText Typo="Typo.h3" GutterBottom="true" Color="Color.Primary">
+                    🧩 SurveyBuilder Demo
+                </MudText>
 
-        <MudDivider Class="my-4" />
+                <MudText Typo="Typo.subtitle1" Class="mb-6">
+                    Build, preview, and render interactive forms using <strong>SurveyBuilder.Blazor</strong>.
+                </MudText>
 
-        <MudStack Spacing="2">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Nav.NavigateTo("/listsurveys/createsurvey"))">
-                ➕ Create New Survey
-            </MudButton>
+                <MudDivider Class="my-4" />
 
-            <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => Nav.NavigateTo("/listsurveys"))">
-                📋 Manage Existing Surveys
-            </MudButton>
+                <MudStack Spacing="3" Class="d-flex align-center" Justify="Justify.Center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="@(() => Nav.NavigateTo("/listsurveys/createsurvey"))">
+                        ➕ Create New Survey
+                    </MudButton>
 
-            <MudButton Variant="Variant.Filled" OnClick="@(() => Nav.NavigateTo("/listavailablesurveys"))">
-                👀 Fill Up Surveys (Read-Only)
-            </MudButton>
-        </MudStack>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                               OnClick="@(() => Nav.NavigateTo("/listsurveys"))">
+                        📋 Manage Existing Surveys
+                    </MudButton>
 
-        <MudDivider Class="my-4" />
+                    <MudButton Variant="Variant.Text" Color="Color.Primary"
+                               OnClick="@(() => Nav.NavigateTo("/listavailablesurveys"))">
+                        👀 Fill Up Surveys (Read-Only)
+                    </MudButton>
+                </MudStack>
 
-        <MudText Typo="Typo.caption" Color="Color.Secondary">
-            This app uses a local, in-memory persistence service. No backend required.
-        </MudText>
-    </MudPaper>
+                <MudDivider Class="my-6" />
+
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    This app uses a local, in-memory persistence service. No backend required.
+                </MudText>
+            </MudPaper>
+         </MudItem>
+    </MudGrid>
 </MudContainer>
