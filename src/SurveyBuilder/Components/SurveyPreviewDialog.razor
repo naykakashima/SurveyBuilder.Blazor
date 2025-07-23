@@ -38,12 +38,20 @@
                             @switch (question.Type)
                             {
                                 case QuestionType.OpenEnded:
-                                    <MudTextField T="string" Placeholder="User answer here..." Lines="3" Disabled="false" FullWidth="true" />
+                                    <MudTextField T="string"
+                                                  Placeholder="User answer here..."
+                                                  Lines="3"
+                                                  FullWidth="true"
+                                                  Value="@(Answers[question.Id] as string)"
+                                                  ValueChanged="val => Answers[question.Id] = val" />
                                     break;
 
                                 case QuestionType.OpinionScale:
                                     <MudStack>
-                                        <MudSlider Min="1" Max="5" Value="3" Step="1" TickMarks="true" />
+                                        <MudSlider Min="1" Max="5"
+                                                   Value="@(Answers[question.Id] as int? ?? 3)"
+                                                   ValueChanged="(int val) => SetAnswerAsInt(question.Id, val)"
+                                                   Step="1" TickMarks="true" />
                                         <MudStack Row="true" Class="d-flex justify-space-between">
                                             <MudText Typo="Typo.caption">1</MudText>
                                             <MudText Typo="Typo.caption">2</MudText>
@@ -56,7 +64,9 @@
 
                                 case QuestionType.LikertScale:
                                 case QuestionType.SingleChoice:
-                                    <MudRadioGroup T="string" Disabled="false">
+                                    <MudRadioGroup T="string"
+                                                   Value="@(Answers[question.Id] as string)"
+                                                   ValueChanged="@(val => Answers[question.Id] = val)">
                                         @foreach (var opt in question.Options)
                                         {
                                             <MudRadio T="string" Value="@opt">@opt</MudRadio>
@@ -67,7 +77,10 @@
                                 case QuestionType.MultiChoice:
                                     @foreach (var opt in question.Options)
                                     {
-                                        <MudCheckBox T="bool" Label="@opt" Disabled="false" />
+                                        <MudCheckBox T="bool"
+                                                     Label="@opt"
+                                                     Value="@GetList(question.Id).Contains(opt)"
+                                                     ValueChanged="@((bool val) => OnMultiChoiceChanged(question.Id, opt, val))" />
                                     }
                                     break;
                             }
@@ -92,9 +105,62 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     [Parameter] public SurveyModel Survey { get; set; } = null!;
 
+    private Dictionary<string, object?> Answers = new();
+
+    protected override void OnInitialized()
+    {
+        foreach (var q in Survey.Questions)
+        {
+            Answers[q.Id] = null;
+        }
+    }
+
     private void HandleSubmit()
     {
+
+        var missingRequired = Survey.Questions
+            .Where(q => q.Required && (Answers[q.Id] == null || IsEmptyAnswer(Answers[q.Id])))
+            .ToList();
+
+        if (missingRequired.Any())
+        {
+            Snackbar.Add("Please fill all required fields before submitting.", Severity.Error);
+            return;
+        }
+
         Snackbar.Add("Survey preview complete!", Severity.Success);
         MudDialog.Close(DialogResult.Ok(true));
     }
+
+    private bool IsEmptyAnswer(object? answer)
+    {
+        return answer switch
+        {
+            string s => string.IsNullOrWhiteSpace(s),
+            List<string> list => list.Count == 0,
+            _ => answer == null
+        };
+    }
+
+    void ToggleListItem(string id, string item, bool isChecked) => SetAnswerAsListString(id, item);
+
+    void OnMultiChoiceChanged(string id, string option, bool isChecked)
+    {
+        var list = GetList(id);
+        if (isChecked && !list.Contains(option))
+            list.Add(option);
+        else if (!isChecked && list.Contains(option))
+            list.Remove(option);
+
+        SetAnswerAsListString(id, list);
+    }
+
+
+    void SetAnswerAsInt(string id, object? value) => Answers[id] = value!;
+    void SetAnswerAsListString(string id, object? value) => Answers[id] = value!;
+    List<string> GetList(string id) => GetAnswer(id) as List<string> ?? new();
+
+    object? GetAnswer(string id) => Answers.TryGetValue(id, out var val) ? val : null;
+
+
 }

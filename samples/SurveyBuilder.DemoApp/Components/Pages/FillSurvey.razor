@@ -113,8 +113,6 @@ else
         Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(Response));
     }
 
-    int? GetNullableInt(string id) => GetAnswer(id) as int?;
-
     object? GetAnswer(string id) => Response.Answers.TryGetValue(id, out var val) ? val : null;
 
     void SetAnswer(string id, object? value) => Response.Answers[id] = value!;
@@ -122,6 +120,7 @@ else
     string? GetString(string id) => GetAnswer(id) as string;
     void SetString(string id, string val) => SetAnswer(id, val);
 
+    int? GetNullableInt(string id) => GetAnswer(id) as int?;
     int GetInt(string id) => (int)(GetAnswer(id) ?? 5);
     void SetInt(string id, object value) => SetAnswer(id, Convert.ToInt32(value));
 
