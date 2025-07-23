@@ -2,7 +2,7 @@
 
 A lightweight, extensible survey/form builder for Blazor applications. Create, edit, and manage surveys with a structured model that serializes to JSON for easy storage and retrieval.
 
-Access the NuGet pacakge here: https://www.nuget.org/packages/SurveyBuilder
+Access the NuGet package here: https://www.nuget.org/packages/SurveyBuilder
 
 ## Features
 
