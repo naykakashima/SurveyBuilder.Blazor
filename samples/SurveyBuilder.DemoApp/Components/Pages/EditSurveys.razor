@@ -16,12 +16,21 @@
 else
 {
     <SurveyBuilderEditor Survey="Survey" SurveyChanged="OnSurveyChanged" />
-    <MudButton OnClick="Save">Save</MudButton>
+
+    <MudText Typo="Typo.subtitle2" Class="mt-4">Serialized Output:</MudText>
+    <MudTextField @bind-Value="Serialized" Lines="20" FullWidth="true" ReadOnly="true" />
+
+    <MudStack Class="d-flex justify-center mt-4">
+        <MudButton OnClick="Save" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" StartIcon="@Icons.Material.Filled.Save">
+            Save to DB
+        </MudButton>
+    </MudStack>
 }
 
 @code {
     [Parameter] public string Id { get; set; } = "";
     private SurveyModel? Survey;
+    private string Serialized = "";
 
     protected override void OnInitialized()
     {
@@ -31,12 +40,14 @@ else
         {
             // Detach from repo to prevent accidental mutation
             Survey = JsonService.Deserialize(JsonService.Serialize(loaded));
+            Serialized = JsonService.Serialize(Survey);
         }
     }
 
     private Task OnSurveyChanged(SurveyModel updated)
     {
         Survey = updated;
+        Serialized = JsonService.Serialize(updated);
         return Task.CompletedTask;
     }
 
@@ -44,6 +55,9 @@ else
     {
         if (Survey is not null)
         {
+            Console.WriteLine("Save triggered:");
+            Console.WriteLine(Serialized);
+
             Repo.Update(Survey);
             Nav.NavigateTo("/listsurveys");
         }
