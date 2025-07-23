@@ -229,5 +229,25 @@ dotnet run --project samples/SurveyBuilder.DemoApp
 - Additional question types
 - Survey analytics
 
+
+## Instructions for using devscript (speed up ci/cd)
+### Usage
+- `-bump` - Version bump type (default: `patch`):
+  ```ps1
+  .\devNuGetScript.ps1 -bump major   # 1.0.0 → 2.0.0
+  .\devNuGetScript.ps1 -bump minor   # 1.0.0 → 1.1.0
+  .\devNuGetScript.ps1 -bump patch   # 1.0.0 → 1.0.1
+-publish - Upload to NuGet.org after building
+
+- Requirements
+    - Create .env file in root directory with:
+    -   ```
+        NUGET_API_KEY=your_nuget_api_key_here
+        Get API key from: https://www.nuget.org/account/apikeys
+        ```
+
+- Example command
+    - ```.\devNuGetScript.ps1```
+
 ## Contributing
 Contributions are welcome! Please open issues for feature requests or bug reports.
