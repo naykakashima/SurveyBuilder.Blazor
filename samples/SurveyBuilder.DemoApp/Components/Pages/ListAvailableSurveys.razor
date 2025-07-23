@@ -1,34 +1,53 @@
 ﻿@page "/listavailablesurveys"
 @using SurveyBuilder.Models
 @using SurveyBuilder.DemoApp.Components.Infrastructure
+@using MudBlazor
 @inject ISurveyRepository Repo
 @inject NavigationManager Nav
 
 <PageTitle>Available Surveys</PageTitle>
 
 <MudPaper Class="p-4 pa-5">
-    <MudText Typo="Typo.h5" Class="mb-4">Available Surveys</MudText>
+    <MudStack Row="true" Class="d-flex align-center mb-4 justify-space-between">
+        <MudText Typo="Typo.h5">Available Surveys</MudText>
+    </MudStack>
 
     @if (Repo.GetAll().Count == 0)
     {
-        <MudText>No surveys available at the moment.</MudText>
+        <MudPaper Class="pa-10 text-center">
+            <MudText Typo="Typo.subtitle1" Color="Color.Secondary">
+                No surveys available at the moment.
+            </MudText>
+        </MudPaper>
     }
     else
     {
-        @foreach (var survey in Repo.GetAll())
-        {
-            <MudCard Class="mb-3">
-                <MudCardContent>
-                    <MudText Typo="Typo.subtitle1">@survey.Title</MudText>
-                    <MudText Typo="Typo.body2">@survey.Description</MudText>
-                </MudCardContent>
-                <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                               OnClick="@(() => Nav.NavigateTo($"/listavailablesurveys/fillsurvey/{survey.Id}"))">
-                        Fill Survey
-                    </MudButton>
-                </MudCardActions>
-            </MudCard>
-        }
+        <MudPaper Class="pa-0">
+            @foreach (var survey in Repo.GetAll())
+            {
+                <MudDivider />
+
+                <MudStack 
+                    Row="true" 
+                    Class="d-flex align-center p-3 hover:bg-grey-lighten-3 transition-all justify-space-between rounded"
+                    Style="border-radius: 8px;">
+
+                    <MudStack Row="false" Spacing="1">
+                        <MudText Typo="Typo.subtitle1">@survey.Title</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@survey.Description</MudText>
+                    </MudStack>
+
+                    <MudStack Row="true" Spacing="3">
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.CheckCircle"
+                                   OnClick="@(() => Nav.NavigateTo($"/listavailablesurveys/fillsurvey/{survey.Id}"))">
+                            Fill Survey
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            }
+
+            <MudDivider />
+        </MudPaper>
     }
 </MudPaper>
