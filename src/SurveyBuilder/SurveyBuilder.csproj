@@ -9,14 +9,19 @@
     <PackageId>SurveyBuilder</PackageId>
   </PropertyGroup>
   <PropertyGroup>
-    <Version>1.1.7-dev</Version>
+    <Version>1.1.10</Version>
     <Authors>Kay</Authors>
-    <Company>KayLabs</Company>
+    <Company>naykakashima</Company>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/naykakashima/SurveyBuilder.Blazor</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/naykakashima/SurveyBuilder.Blazor</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>Initial release of SurveyBuilder - enjoy!</PackageReleaseNotes>
     <Description>Reusable Blazor components to build and render surveys dynamically, inspired by SurveyJS.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageTags>blazor, survey, forms, components</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <SupportedPlatform Include="browser" />
